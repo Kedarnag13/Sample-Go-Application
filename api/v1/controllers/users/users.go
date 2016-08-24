@@ -1,9 +1,10 @@
 package users
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/Kedarnag13/Sample-Go-Application/api/v1/models"
+	_ "github.com/lib/pq"
 	"io/ioutil"
 	"net/http"
 )
@@ -36,6 +37,20 @@ func (u User) Create(rw http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	fmt.Printf("Id:%v", user.Id)
-	fmt.Printf("Name:%v", user.Name)
+	// To open a connection with the postgres database, we should mention all the required information such as dbname, password, host and sslmode
+	db, err := sql.Open("postgres", "dbname=go_training password=password host=localhost sslmode=disable")
+
+	if err != nil {
+		panic(err)
+	}
+
+	// To insert data into the relation/table, insert command is used and syntax is as below.
+	// The reason for multiple assignment is, the insert command can behave in 2 ways
+	// Success - If the values are inserted, insert_user will have the success result.
+	// Failure - If the values are not inserted, err will have the failure message.
+	insert_user, err := db.Query("INSERT INTO users(id, name) VALUES($1, $2)", user.Id, user.Name)
+	if err != nil || insert_user == nil {
+		panic(err)
+	}
+
 }
